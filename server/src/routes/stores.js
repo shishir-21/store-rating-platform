@@ -8,17 +8,18 @@ router.use(requireAuth);
 
 router.get('/', async (req, res, next) => {
   try {
-    const { search = '', name = '', email = '', address = '', sort = 'name', order = 'asc' } = req.query;
+    const { q = '', sort = 'name', order = 'asc' } = req.query;
     const { limit, offset } = pagination(req.query);
     const sortColumn = safeSort(sort, ['name', 'email', 'address', 'average_rating'], 'name');
-    const term = `%${search}%`;
+    const term = `%${q}%`;
     const { rows } = await pool.query(`
       SELECT s.id,s.name,s.email,s.address,ROUND(AVG(r.score)::numeric, 2) AS average_rating,
         MAX(r.score) FILTER (WHERE r.user_id = $1) AS user_rating, COUNT(r.id)::int AS rating_count
       FROM stores s LEFT JOIN ratings r ON r.store_id=s.id
-      WHERE (s.name ILIKE $2 OR s.address ILIKE $2) AND s.name ILIKE $3 AND s.email ILIKE $4 AND s.address ILIKE $5
-      GROUP BY s.id ORDER BY ${sortColumn === 'average_rating' ? 'AVG(r.score)' : `s.${sortColumn}`} ${direction(order)} NULLS LAST
-      LIMIT $6 OFFSET $7`, [req.user.id, term, `%${name}%`, `%${email}%`, `%${address}%`, limit, offset]);
+      GROUP BY s.id
+      HAVING s.name ILIKE $2 OR s.email ILIKE $2 OR s.address ILIKE $2 OR ROUND(AVG(r.score)::numeric, 2)::text ILIKE $2
+      ORDER BY ${sortColumn === 'average_rating' ? 'AVG(r.score)' : `s.${sortColumn}`} ${direction(order)} NULLS LAST
+      LIMIT $3 OFFSET $4`, [req.user.id, term, limit, offset]);
     return res.json({ stores: rows, limit, offset });
   } catch (error) { return next(error); }
 });
