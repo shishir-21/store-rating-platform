@@ -45,6 +45,8 @@ router.post('/stores', async (req, res, next) => {
   try {
     const { name, email, address, ownerId = null } = req.body;
     const errors = {}; if (!name?.trim()) errors.name = 'Store name is required.'; if (!email?.includes('@')) errors.email = 'Enter a valid email address.'; if (!address?.trim() || address.length > 400) errors.address = 'Address is required and may not exceed 400 characters.';
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (ownerId && !uuidRegex.test(ownerId)) errors.ownerId = 'Choose a valid store owner.';
     if (Object.keys(errors).length) return res.status(422).json({ errors });
     if (ownerId) { const owner = await pool.query(`SELECT id FROM users WHERE id=$1 AND role='STORE_OWNER'`, [ownerId]); if (!owner.rows[0]) return res.status(422).json({ errors: { ownerId: 'Choose a valid store owner.' } }); }
     const { rows } = await pool.query('INSERT INTO stores(name,email,address,owner_id) VALUES($1,$2,$3,$4) RETURNING *', [name.trim(),email.toLowerCase(),address.trim(),ownerId]);
