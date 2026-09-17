@@ -26,14 +26,14 @@ router.post('/users', async (req, res, next) => {
 
 router.get('/users', async (req, res, next) => {
   try {
-    const { q = '', sort = 'name', order = 'asc' } = req.query; 
+    const { q = '', role = '', sort = 'name', order = 'asc' } = req.query; 
     const { limit, offset } = pagination(req.query);
     const col = safeSort(sort, ['name','email','address','role','created_at'], 'name');
     const term = `%${q}%`;
     const { rows } = await pool.query(`SELECT u.id,u.name,u.email,u.address,u.role,ROUND(AVG(r.score)::numeric,2) AS rating
       FROM users u LEFT JOIN stores s ON s.owner_id=u.id LEFT JOIN ratings r ON r.store_id=s.id
-      WHERE u.name ILIKE $1 OR u.email ILIKE $1 OR u.address ILIKE $1 OR u.role::text ILIKE $1
-      GROUP BY u.id ORDER BY u.${col} ${direction(order)} LIMIT $2 OFFSET $3`, [term, limit, offset]);
+      WHERE ($4 = '' OR u.role::text = $4) AND (u.name ILIKE $1 OR u.email ILIKE $1 OR u.address ILIKE $1 OR u.role::text ILIKE $1)
+      GROUP BY u.id ORDER BY u.${col} ${direction(order)} LIMIT $2 OFFSET $3`, [term, limit, offset, role]);
     return res.json({ users: rows, limit, offset });
   } catch (error) { return next(error); }
 });
