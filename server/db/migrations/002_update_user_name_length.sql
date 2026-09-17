@@ -1,0 +1,2 @@
+ALTER TABLE users DROP CONSTRAINT users_name_length;
+ALTER TABLE users ALTER COLUMN name TYPE VARCHAR(100);
