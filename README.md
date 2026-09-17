@@ -10,3 +10,4 @@ Role-based store-rating platform built with React, Express, and PostgreSQL.
 
 The client runs at `http://localhost:5173` and the API at `http://localhost:4000`.
 
+After seeding, use `admin@storescore.test` / `Welcome!1` for the administrator dashboard.
