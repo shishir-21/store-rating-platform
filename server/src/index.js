@@ -8,18 +8,37 @@ import ownerRouter from './routes/owner.js';
 
 const app = express();
 
-const allowedOrigins = config.nodeEnv === 'production' 
-  ? [config.frontendUrl] 
-  : ['http://localhost:5173', config.frontendUrl];
+// Build the allowlist from the config.allowedOrigins array (may contain exact URLs or simple wildcard patterns)
+const allowedOrigins = config.allowedOrigins;
+
+function isOriginAllowed(origin) {
+  // Allow requests without Origin header (same-origin or server-to-server)
+  if (!origin) return true;
+  // Direct match
+  if (allowedOrigins.includes(origin)) return true;
+  // Wildcard pattern match (e.g., https://store-rating-platform-client-*.vercel.app)
+  for (const pattern of allowedOrigins) {
+    if (pattern.includes('*')) {
+      // Escape regex special characters, then replace * with .* for wildcard matching
+      const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp('^' + escaped.replace(/\*/g, '.*') + '$');
+      if (regex.test(origin)) return true;
+    }
+  }
+  return false;
+}
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
