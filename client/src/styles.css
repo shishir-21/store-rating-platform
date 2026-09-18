@@ -36,6 +36,45 @@ select {
   background: #fff;
 }
 
+.password-input {
+  position: relative;
+  display: block;
+}
+
+.password-input input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  transform: translateY(-50%);
+  background: transparent;
+  color: #64748b;
+}
+
+.password-toggle:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.password-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 label {
   display: grid;
   gap: 6px;

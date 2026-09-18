@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
@@ -31,10 +31,42 @@ const getErrorMessage = (error) =>
 
 // --- Reusable UI Elements ---
 function Field({ label, value, set, type = 'text', hint, ...props }) {
+  const inputId = useId();
+  const isPassword = type === 'password';
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   return (
-    <label>
+    <label htmlFor={inputId}>
       {label}
-      <input type={type} value={value} onChange={(e) => set(e.target.value)} {...props} />
+      <span className={isPassword ? 'password-input' : undefined}>
+        <input
+          id={inputId}
+          type={isPassword && isPasswordVisible ? 'text' : type}
+          value={value}
+          onChange={(e) => set(e.target.value)}
+          {...props}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+            onClick={() => setIsPasswordVisible((visible) => !visible)}
+          >
+            {isPasswordVisible ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 3l18 18M10.6 6.2A10.6 10.6 0 0 1 12 6c6.5 0 10 6 10 6a18 18 0 0 1-3.3 3.8M6.2 6.2A18 18 0 0 0 2 12s3.5 6 10 6c1.2 0 2.3-.2 3.3-.6" />
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+              </svg>
+            )}
+          </button>
+        )}
+      </span>
       {hint && <small>{hint}</small>}
     </label>
   );
