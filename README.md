@@ -20,3 +20,17 @@ Also available after seeding: `user@storescore.test` and `owner@storescore.test`
 - **Administrator** — dashboard totals, sortable/filterable users and store directory, and creation forms.
 - **Normal user** — registration, password changes, searchable stores, and one editable 1–5 rating per store.
 - **Store owner** — password changes, average store rating, and the users who rated their store.
+
+## Production Deployment
+
+### Backend Environment Variables
+Set the following environment variables on your backend hosting provider (e.g., Render):
+- \PORT\: Port for the API to listen on (e.g., \4000\).
+- \NODE_ENV\: Set to \production\.
+- \DATABASE_URL\: Your PostgreSQL connection string. Ensure your database is configured using this.
+- \JWT_SECRET\: A secure random string for signing JWTs.
+- \FRONTEND_URL\: The deployed Vercel frontend URL (e.g., \https://YOUR-VERCEL-DOMAIN.vercel.app\). This is used for secure CORS configuration.
+
+### Frontend Environment Variable
+Set the following environment variable on your frontend hosting provider (e.g., Vercel):
+- \VITE_API_URL\: Points to the deployed backend \/api\ URL (e.g., \https://YOUR-RENDER-BACKEND.onrender.com/api\).
