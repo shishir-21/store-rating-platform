@@ -1,36 +1,205 @@
-# Store Ratings Platform
+# StoreScore
 
-Role-based store-rating platform built with React, Express, and PostgreSQL.
+A full-stack store rating platform built for the FullStack Intern Coding Challenge.
 
-## Setup
+Users can register, log in, browse stores, and submit ratings from 1 to 5. The application uses role-based access for Administrators, Normal Users, and Store Owners.
 
-1. Install Node.js 20+ and PostgreSQL 14+.
-2. Copy `.env.example` to `.env` and set `DATABASE_URL` and `JWT_SECRET`.
-3. Create the `store_ratings` database, then run `npm install`, `npm run db:migrate`, and `npm run db:seed`.
-4. Run `npm run dev`.
+## Live Demo
 
-The client runs at `http://localhost:5173` and the API at `http://localhost:4000`.
+**Frontend:** https://store-rating-platform-client-b9pvlqcu5-shishir-21s-projects.vercel.app
 
-After seeding, use `admin@storescore.test` / `Welcome!1` for the administrator dashboard.
+**Backend API:** https://store-score-api.onrender.com
 
-Also available after seeding: `user@storescore.test` and `owner@storescore.test`, both with password `Welcome!1`.
+**Health Check:** https://store-score-api.onrender.com/api/health
 
-## Roles
 
-- **Administrator** — dashboard totals, sortable/filterable users and store directory, and creation forms.
-- **Normal user** — registration, password changes, searchable stores, and one editable 1–5 rating per store.
-- **Store owner** — password changes, average store rating, and the users who rated their store.
+## Demo Accounts
 
-## Production Deployment
+All demo accounts use this Password:
+```bash
+Welcome!1
+```
 
-### Backend Environment Variables
-Set the following environment variables on your backend hosting provider (e.g., Render):
-- \PORT\: Port for the API to listen on (e.g., \4000\).
-- \NODE_ENV\: Set to \production\.
-- \DATABASE_URL\: Your PostgreSQL connection string. Ensure your database is configured using this.
-- \JWT_SECRET\: A secure random string for signing JWTs.
-- \FRONTEND_URL\: The deployed Vercel frontend URL (e.g., \https://YOUR-VERCEL-DOMAIN.vercel.app\). This is used for secure CORS configuration.
+Administrator
+```bash
+admin@storescore.test
+```
 
-### Frontend Environment Variable
-Set the following environment variable on your frontend hosting provider (e.g., Vercel):
-- \VITE_API_URL\: Points to the deployed backend \/api\ URL (e.g., \https://YOUR-RENDER-BACKEND.onrender.com/api\).
+Normal User
+```bash
+user@storescore.test
+```
+
+Store Owner
+```bash
+owner@storescore.test
+```
+
+## Tech Stack
+
+- **Frontend:** React.js, Vite, CSS
+- **Backend:** Node.js, Express.js
+- **Database:** PostgreSQL
+- **Authentication:** JWT + bcryptjs
+
+## Features
+
+### System Administrator
+- Dashboard with total users, stores, and ratings
+- Add users and stores
+- Create Admin, Normal User, and Store Owner accounts
+- Search, filter, and sort users
+- Search and sort stores
+- View user details and Store Owner ratings
+
+### Normal User
+- Sign up and log in
+- View and search stores
+- Submit ratings from 1–5
+- Update submitted ratings
+- Update password
+- Log out
+
+### Store Owner
+- Log in
+- View store average rating
+- View users who submitted ratings
+- View submitted ratings
+- Sort rating records
+- Update password
+- Log out
+
+## Validation
+
+- Name: 20–60 characters
+- Address: Maximum 400 characters
+- Password: 8–16 characters
+- Password must contain an uppercase letter and special character
+- Standard email validation
+- Rating: 1–5
+
+## Project Structure
+
+```text
+store-rating-platform/
+├── client/        # React + Vite frontend
+├── server/        # Express backend
+├── README.md
+└── .gitignore
+```
+
+## Getting Started
+
+1. Clone Repository
+```bash
+git clone https://github.com/shishir-21/store-rating-platform.git
+cd store-rating-platform
+```
+
+2. Install Dependencies
+Frontend:
+```bash
+cd client
+npm install
+```
+
+Backend:
+```bash
+cd ../server
+npm install
+```
+
+3. Environment Variables
+
+Create server/.env:
+```bash
+PORT=4000
+NODE_ENV=development
+DATABASE_URL=your_postgresql_connection_string
+JWT_SECRET=your_secure_random_secret
+FRONTEND_URL=http://localhost:5173
+```
+
+4. Setup Database
+
+Run migrations:
+```bash
+npm --prefix server run migrate
+```
+
+Seed demo data:
+```bash
+npm --prefix server run seed
+```
+
+5. Run Application
+
+Backend:
+```bash
+cd server
+npm start
+```
+
+Frontend:
+```bash
+cd client
+npm run dev
+```
+
+Frontend: http://localhost:5173
+Backend: http://localhost:4000
+
+## API
+
+Main API routes:
+```
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/me
+PATCH  /api/auth/password
+
+GET    /api/stores
+PUT    /api/stores/:storeId/rating
+
+GET    /api/admin/stats
+GET    /api/admin/users
+POST   /api/admin/users
+GET    /api/admin/users/:id
+POST   /api/admin/stores
+
+GET    /api/owner/dashboard
+```
+
+## Database
+
+The database contains three main tables:
+```
+users
+stores
+ratings
+```
+
+The database uses:
+
+UUID primary keys
+Foreign keys
+Unique constraints
+Rating constraints
+Indexes
+Parameterized SQL queries
+
+## Production
+
+The application is prepared for deployment using:
+```
+Frontend  → Vercel
+Backend   → Render
+Database  → Neon PostgreSQL
+```
+
+Production configuration supports JWT authentication, CORS protection, PostgreSQL SSL, and environment-based secrets.
+
+## Author
+
+Shishir Mahato
+Full Stack Developer
