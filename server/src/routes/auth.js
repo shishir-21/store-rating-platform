@@ -9,23 +9,32 @@ const router = Router();
 const publicUser = ({ password_hash, ...user }) => user;
 const sign = (user) => jwt.sign({ id: user.id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '8h' });
 
-router.post('/register', async (req, res, next) => {
+export const normalizeRegistrationEmail = (email) =>
+  typeof email === 'string' ? email.trim().toLowerCase() : email;
+
+export const isUsersEmailUniqueViolation = (error) =>
+  error?.code === '23505' && error.constraint === 'users_email_key';
+
+export async function register(req, res, next, database = pool) {
   try {
     const { name, email, address, password } = req.body;
-    const errors = validateUserInput({ name, email, address, password });
+    const normalizedEmail = normalizeRegistrationEmail(email);
+    const errors = validateUserInput({ name, email: normalizedEmail, address, password });
     if (Object.keys(errors).length) return res.status(422).json({ errors });
     const hash = await bcrypt.hash(password, 12);
-    const result = await pool.query(
+    const result = await database.query(
       `INSERT INTO users (name, email, address, password_hash, role) VALUES ($1,$2,$3,$4,'USER') RETURNING id,name,email,address,role,created_at`,
-      [name.trim(), email.toLowerCase(), address.trim(), hash]
+      [name.trim(), normalizedEmail, address.trim(), hash]
     );
     const user = result.rows[0];
     return res.status(201).json({ user, token: sign(user) });
   } catch (error) {
-    if (error.code === '23505') return res.status(409).json({ errors: { email: 'This email is already registered.' } });
+    if (isUsersEmailUniqueViolation(error)) return res.status(409).json({ errors: { email: 'This email is already registered.' } });
     return next(error);
   }
-});
+}
+
+router.post('/register', (req, res, next) => register(req, res, next));
 
 router.post('/login', async (req, res, next) => {
   try {
