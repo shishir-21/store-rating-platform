@@ -6,7 +6,7 @@ Users can register, log in, browse stores, and submit ratings from 1 to 5. The a
 
 ## Live Demo
 
-**Frontend:** https://store-rating-platform-client-b9pvlqcu5-shishir-21s-projects.vercel.app
+**Frontend:** https://store-rating-platform-client-nnw18tvez-shishir-21s-projects.vercel.app/
 
 **Backend API:** https://store-score-api.onrender.com
 
