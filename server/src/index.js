@@ -1,28 +1,38 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { config } from './config.js';
 import authRouter from './routes/auth.js';
 import storesRouter from './routes/stores.js';
 import adminRouter from './routes/admin.js';
 import ownerRouter from './routes/owner.js';
 
-const app = express();
+export const app = express();
 
 // Build the allowlist from the config.allowedOrigins array (may contain exact URLs or simple wildcard patterns)
 const allowedOrigins = config.allowedOrigins;
 
-function isOriginAllowed(origin) {
+function wildcardPatternToRegex(pattern) {
+  // Escape each literal section independently so `*` remains a wildcard token.
+  // Escaping the complete string first would turn `*` into `\\*`, preventing
+  // the subsequent wildcard replacement from matching preview URLs.
+  const escapedParts = pattern
+    .split('*')
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+
+  return new RegExp(`^${escapedParts.join('.*')}$`);
+}
+
+export function isOriginAllowed(origin, origins = allowedOrigins) {
   // Allow requests without Origin header (same-origin or server-to-server)
   if (!origin) return true;
   // Direct match
-  if (allowedOrigins.includes(origin)) return true;
+  if (origins.includes(origin)) return true;
   // Wildcard pattern match (e.g., https://store-rating-platform-client-*.vercel.app)
-  for (const pattern of allowedOrigins) {
+  for (const pattern of origins) {
     if (pattern.includes('*')) {
-      // Escape regex special characters, then replace * with .* for wildcard matching
-      const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp('^' + escaped.replace(/\*/g, '.*') + '$');
-      if (regex.test(origin)) return true;
+      if (wildcardPatternToRegex(pattern).test(origin)) return true;
     }
   }
   return false;
@@ -61,4 +71,9 @@ app.use((error, _req, res, _next) => {
 });
 
 const { port } = config;
-app.listen(port, '0.0.0.0', () => console.log(`API listening on ${port}`));
+const isDirectExecution = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectExecution) {
+  app.listen(port, '0.0.0.0', () => console.log(`API listening on ${port}`));
+}
